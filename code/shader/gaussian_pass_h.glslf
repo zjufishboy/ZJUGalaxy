@@ -15,18 +15,6 @@ float offsets[5] = float[](0.00000000,1.41176471,3.29411765,5.17647059,7.0588235
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {    
-    weights[0] = 0.19638062;
-    weights[1] = 0.29675293;
-    weights[2] = 0.09442139;
-    weights[3] = 0.01037598;
-    weights[4] = 0.00025940;
-    
-    offsets[0] = 0.00000000;
-    offsets[1] = 1.41176471;
-    offsets[2] = 3.29411765;
-    offsets[3] = 5.17647059;
-    offsets[4] = 7.05882353;
-    
     vec2 uv = fragCoord.xy / resolution.xy;
     
     vec3 color = vec3(0.0);
