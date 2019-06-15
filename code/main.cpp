@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include<Windows.h>
 #include<string>
-#include <math.h>
+#include<math.h>
 #include "glut.h"
 
 //定义
@@ -40,9 +40,10 @@ const GLdouble BODY_ROTATION_SPEED_FACTOR = 1;	//行星自转速度参数
 
 //背景图纹理路径
 char *BACKGROUND = TEXTURE_PATH("milky_way");
-
+char *backgrounds_path[6] = { TEXTURE_PATH("milky_way2"),TEXTURE_PATH("milky_way2"),TEXTURE_PATH("milky_way2"),TEXTURE_PATH("milky_way2"),TEXTURE_PATH("milky_way2"),TEXTURE_PATH("milky_way2") };
 //背景纹理编号
 GLuint *background = &texture[9];
+GLuint backgrounds[6];
 
 //整体相对偏移数据
 float fTranslate;								//移动初始值
@@ -161,7 +162,7 @@ unsigned char *LoadBitmapFile(char *filename, BITMAPINFOHEADER *bitmapInfoHeader
 	return bitmapImage;
 }
 //加载纹理图片到纹理数组
-void texload(int i, char *filename)
+void texload(int i, char *filename, GLuint * texture)
 {
 	BITMAPINFOHEADER bitmapInfoHeader;                                 // bitmap信息头
 	unsigned char*   bitmapData;                                       // 纹理数据
@@ -189,11 +190,15 @@ void init()
 {
 	//初始化纹理
 	glGenTextures(10, texture);//设置纹理数组                        
+	glGenTextures(6, backgrounds);
 	GLint i;
 	for(i=0;i<9;i++){
-		texload(i, (solarSystem[i].texture_path));//加载对应的星球贴图
+		texload(i, (solarSystem[i].texture_path),texture);//加载对应的星球贴图
 	}
-	texload(9,BACKGROUND);//背景图纹理
+	texload(9,BACKGROUND,texture);//背景图纹理
+	for (i = 0; i < 6; i++) {
+		texload(i, (backgrounds_path[i]),backgrounds);//加载对应的背景贴图
+	}
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //多边形的显示方式,模式将适用于物体的所有面采用填充形式
 }
 //公转半径计算：因为无法完全按照比例来，所以参考了国际画图标准，将地内行星的比例相对改变了
@@ -224,18 +229,67 @@ void multiply_vector_by_matrix(GLdouble vector[3], GLdouble matrix[16]) {
 	vector[2] = x * matrix[8] + y * matrix[9] + z * matrix[10] + matrix[11];
 }
 
+
 //绘制背景，保持2：1的比例
 void draw_background() {
+	GLfloat background_coord2f[6][4][3] = {
+		{
+			{-1,-1, 1},
+			{ 1,-1, 1},
+			{ 1, 1, 1},
+			{-1, 1, 1}
+		},
+		{
+			{-1,-1,-1},
+			{ 1,-1,-1},
+			{ 1, 1,-1},
+			{-1, 1,-1}
+		},
+		{
+			{-1,-1, 1},
+			{ 1,-1, 1},
+			{ 1,-1,-1},
+			{-1,-1,-1}
+
+		},
+		{
+			{-1, 1,-1},
+			{ 1, 1,-1},
+			{ 1, 1, 1},
+			{-1, 1, 1}
+		},
+		{
+			{-1,-1, 1},
+			{-1,-1,-1},
+			{-1, 1,-1},
+			{-1, 1, 1}
+		},
+		{
+			{ 1,-1,-1},
+			{ 1,-1, 1},
+			{ 1, 1, 1},
+			{ 1, 1,-1}
+			
+		},
+	};
+	GLfloat TexCoord[4][2] = {
+		{0.0f,0.0f},{1.0f,0.0f},{1.0f,1.0f},{0.0f,1.0f}
+	};
 	glEnable(GL_TEXTURE_2D);					//开启贴图
-	glBindTexture(GL_TEXTURE_2D, *background);	//绑定贴图
-	glBegin(GL_QUADS);							//开始画正方形
-	glTexCoord2f(0, 0);glVertex3f(-1, -0.5, 0);	//绑定四个点
-	glTexCoord2f(1, 0);glVertex3f( 1, -0.5, 0);
-	glTexCoord2f(1, 1);glVertex3f( 1,  0.5, 0);
-	glTexCoord2f(0, 1);glVertex3f(-1,  0.5, 0);
-	glEnd();									//结束
-	glDisable(GL_TEXTURE_2D);					//关闭贴图
+	for (int i = 0; i < 6; i++) {
+		glBindTexture(GL_TEXTURE_2D, backgrounds[i]);	//绑定贴图
+		glEnable(GL_TEXTURE_2D);																	//启用二维纹理
+		glBegin(GL_QUADS);
+
+		/** 指定纹理坐标和顶点坐标 */
+		for (int j = 0; j < 4; j++) {
+			glTexCoord2f(TexCoord[j][0], TexCoord[j][1]); glVertex3f(background_coord2f[i][j][0], background_coord2f[i][j][1], background_coord2f[i][j][2]);
+		}
+		glEnd();
+		glDisable(GL_TEXTURE_2D);					//关闭贴图
+	}
 }
+	
 
 //更新旋转信息
 
@@ -405,8 +459,8 @@ void Display()
 	
 	//背景图绘制
 	glPushMatrix();
-	glTranslatef(0, 0, -90);
-	glScalef(360, 360, 1);
+	//glTranslatef(0, 0, -90);
+	glScalef(10, 10, 10);
 	draw_background();					
 	glPopMatrix();
 
@@ -419,7 +473,7 @@ void Display()
 	Draw_Galaxy();								// 绘制星系
 	if (bAnim)	fRotate += 0.1f;
 	if (bRotate)body_rotation		   += 0.01f;//公转衡量度
-	if (bRotateSelf)body_rotation_self += 0.01f;//自转衡量度
+	if (bRotateSelf)body_rotation_self += 0.0001f;//自转衡量度
 	glutSwapBuffers();							
 }
 
