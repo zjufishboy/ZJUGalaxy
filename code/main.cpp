@@ -4,7 +4,7 @@
 #include<Windows.h>
 #include<string>
 #include <math.h>
-#include "glut.h"
+#include "gl/glut.h"
 
 //定义
 #define BITMAP_ID 0x4D42
@@ -414,7 +414,7 @@ void Display()
 	glRotatef(fRotate, 0, 1.0f, 0);				// 旋转
 	glRotatef(-90, 1, 0, 0);					// 旋转坐标系
 	glScalef(0.2, 0.2, 0.2);					//缩放
-
+   
 	glEnable(GL_NORMALIZE);
 	Draw_Galaxy();								// 绘制星系
 	if (bAnim)	fRotate += 0.1f;
@@ -423,7 +423,7 @@ void Display()
 	glutSwapBuffers();							
 }
 
-int main (int argc,  char *argv[])
+int main(int argc,  char *argv[])
 {
 	
 	glutInit(&argc, argv);
