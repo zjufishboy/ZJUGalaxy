@@ -1,6 +1,22 @@
 cmake_minimum_required (VERSION 3.8)
 
-aux_source_directory(. src)
+set(src
+	"blackhole.cpp"
+	"blackhole.h"
+	"bloom.cpp"
+	"bloom.h"
+	"cgl_shader.cpp"
+	"cgl_shader.h"
+	"common.cpp"
+	"common.h"
+	"draw_texture.cpp"
+	"draw_texture.h"
+	"input.cpp"
+	"input.h"
+	"sphere_tree.cpp"
+	"sphere_tree.h"
+)
+
 
 # 添加源文件
 add_executable (ZJUGalaxy "main.cpp" ${src})

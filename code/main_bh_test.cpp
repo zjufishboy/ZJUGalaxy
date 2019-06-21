@@ -34,8 +34,6 @@ void set_cam_rot_velocity(vec2 rot) {
     cam_rot_v += rot * cam_rot_v_init;
 }
 
-float time_previous = -1;
-
 void update(float time_elapsed) {
     cam_pos += cam_pos_v * time_elapsed;
     cam_rot += cam_rot_v * time_elapsed;
@@ -87,6 +85,7 @@ void render() {
     
 }
 
+float time_previous = -1;
 void display() {
     {
         static int frames, last_time;
@@ -133,59 +132,6 @@ static void key_up(unsigned char k, int x, int y)
 static void key_down(unsigned char k, int x, int y)
 {
     input.on_key_down(k);
-    //switch (k) {
-    //    case 'a': {											//视角变化
-    //        set_cam_pos_velocity(vec3(-1, 0, 0));
-    //        break;
-    //    }
-    //    case 'd': {
-    //        set_cam_pos_velocity(vec3(1, 0, 0));
-    //        break;
-    //    }
-    //    case 'w': {
-    //        set_cam_pos_velocity(vec3(0, 1, 0));
-    //        break;
-    //    }
-    //    case 's': {
-    //        set_cam_pos_velocity(vec3(0, -1, 0));
-    //        break;
-    //    }
-    //    case 'z': {
-    //        set_cam_pos_velocity(vec3(0, 0, -1));
-    //        break;
-    //    }
-    //    case 'x': {
-    //        set_cam_pos_velocity(vec3(0, 0, 1));
-    //        break;
-    //    }
-    //    case 'j': {								//视角变化
-    //        //cam_rot[0] -= cam_rot_delta;
-    //        set_cam_rot_velocity(vec2(-1, 0));
-    //        //cam_rot_v[0] = -cam_rot_v_init;
-    //        break;
-    //    }
-    //    case 'l': {
-    //        //cam_rot[0] += cam_rot_delta;
-    //        //cam_rot_v[0] = cam_rot_v_init;
-    //        set_cam_rot_velocity(vec2(1, 0));
-
-    //        break;
-    //    }
-    //    case 'i': {
-    //        //cam_rot[1] += cam_rot_delta;
-    //        //cam_rot_v[1] = -cam_rot_v_init;
-    //        set_cam_rot_velocity(vec2(0, -1));
-
-    //        break;
-    //    }
-    //    case 'k': {
-    //        //cam_rot[1] -= cam_rot_delta;
-    //       // cam_rot_v[1] = cam_rot_v_init;
-    //        set_cam_rot_velocity(vec2(0, 1));
-
-    //        break;
-    //    }
-    //}
 }
 
 int main(int argc, char* argv[])
@@ -196,7 +142,7 @@ int main(int argc, char* argv[])
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_SINGLE);
     glutInitWindowSize(800, 600);
 
-    int windowHandle = glutCreateWindow("计算机图形学期末项目：ZJUGalaxy");
+    int windowHandle = glutCreateWindow("黑洞测试 WASDZX=相机位置 IJKL=相机方向");
     _set_time_start();
 
     GLenum err = glewInit();

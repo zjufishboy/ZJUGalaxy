@@ -1,6 +1,8 @@
 #pragma once
 #include <unordered_map>
 
+using namespace std;
+
 class Input {
     unordered_map<char, bool> keys_pressed;
 public:
