@@ -19,6 +19,13 @@ float length2(vec3 v) {
     return dot(v, v);
 }
 
+struct LeafSphereInfo {
+    int particle_type;
+    int __no_use;
+};
+static_assert(sizeof(LeafSphereInfo) == 8, "size");
+
+
 struct Sphere {
     vec3 position;
     float radius = -1;
@@ -32,8 +39,8 @@ struct Sphere {
 struct SphereTreeNode {
     Sphere sphere;
     vector<SphereTreeNode*> children;
-    int particle_type;
-    int __no_use;
+    LeafSphereInfo info;
+    int leaf_index = -1;
     //SphereTreeNode* left = nullptr;
     //SphereTreeNode* right = nullptr;
     bool leaf() { return children.size() == 0; }
@@ -47,33 +54,35 @@ struct SphereTreeNode {
     SphereTreeNode(Sphere sp) : sphere(sp) {};
 };
 
-class GPUSphereTree {
-    SphereTreeNode* _root;
-public:
-    GPUSphereTree(SphereTreeNode* root) : _root(root) {
-
-    }
-    ~GPUSphereTree() {
-        if (_root) delete _root;
-    }
-};
-
 struct GPUSphereTreeNode {
     vec3 position;
     float radius;
     int on_hit; // next. -1 = particle
     int on_miss; // miss. -1 = end
-    int particle_type;
-    int __no_use;
+};
+static_assert(sizeof(GPUSphereTreeNode) == 24, "size");
+
+
+class GPUSphereTree {
+    int _n_nodes;
+    GPUSphereTreeNode* _nodes;
+    int _n_info;
+    LeafSphereInfo* _info;
+
+public:
+    GPUSphereTree(int n_nodes, GPUSphereTreeNode* nodes, int n_info, LeafSphereInfo* info) : _n_nodes(n_nodes), _nodes(nodes), _n_info(n_info), _info(info) {
+
+    }
+    ~GPUSphereTree() {
+        if (_nodes) delete _nodes;
+        if (_info) delete _info;
+    }
 };
 
-static_assert(sizeof(GPUSphereTreeNode) == 32, "size");
-
-
 class SphereTree {
-
-    SphereTreeNode* root = nullptr;
-
+    vector<Sphere> _spheres;
+    SphereTreeNode* _root = nullptr;
+    
     float find_coverage_radius(vec3 center, const vector<Sphere>& spheres) {
         int i_max_dist;
         float max_dist = -1;
@@ -102,6 +111,14 @@ class SphereTree {
             i++;
         }
         return i_max_dist;
+    }
+
+    int count_nodes(SphereTreeNode* node) {
+        int c = 1;
+        for (auto& child : node->children) {
+            c += count_nodes(child);
+        }
+        return c;
     }
 
     SphereTreeNode* construct_node(vector<Sphere> spheres) {
@@ -157,20 +174,21 @@ class SphereTree {
 
 public:
     SphereTree(vector<Sphere> spheres) {
-        root = construct_node(move(spheres));
+        _spheres = move(spheres);
+        _root = construct_node(_spheres);
     };
 
     SphereTree(const SphereTree&) = delete;
     SphereTree(SphereTree&&) = delete;
 
     int height() {
-        return root->height();
+        return _root->height();
     }
 
     SphereTreeNode* query_first(vec3 position, int& amt) {
         amt = 0;
         stack<SphereTreeNode*> stk;
-        stk.push(root);
+        stk.push(_root);
         while (!stk.empty()) {
             auto current = stk.top();
             stk.pop();
@@ -186,7 +204,22 @@ public:
     }
 
     GPUSphereTree generate_gpu_tree() {
-        // TO DO
+        auto* leaf_info = new LeafSphereInfo[_spheres.size()];
+        auto* nodes = new GPUSphereTreeNode[count_nodes(_root)];
+
+        stack<SphereTreeNode*> stk;
+        stk.push(_root);
+        int i_node = 0;
+        int i_leaf = 0;
+        while (!stk.empty()) {
+            auto current = stk.top();
+            stk.pop();
+            
+            i_node++;
+        }
+
+        GPUSphereTree gt(i_node, nodes, _spheres.size(), leaf_info);
+        return gt;
     };
 };
 

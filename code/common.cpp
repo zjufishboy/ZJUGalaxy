@@ -1,7 +1,7 @@
 #include "common.h"
 
 double geometry[4] = { 800, 600, 0, 0 };
-int tick_start;
+clock_t tick_start;
 
 i32vec2 resolution_2i() {
     return i32vec2(geometry[0], geometry[1]);
@@ -29,6 +29,27 @@ void load_texture(GLuint* tex_id, char* filename)
     glTexImage2D(GL_TEXTURE_2D, 0, 3, BMP.bmWidth, BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits);
 
     DeleteObject(hBMP);
+}
+
+void load_cubemap(GLuint* tex_id, const vector<char*>& files)
+{
+    if (files.size() != 6) throw logic_error("expect 6 files");
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    glGenTextures(1, tex_id);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, *tex_id);
+    for (int i = 0; i < 6; i++) {
+        char* filename = files[i];
+        HBITMAP hBMP;
+        BITMAP BMP;
+        hBMP = (HBITMAP)LoadImage(NULL, filename, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
+        GetObject(hBMP, sizeof(BMP), &BMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(
+            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+            0, 3, BMP.bmWidth, BMP.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, BMP.bmBits
+        );
+    }
 }
 
 void create_framebuffer(GLuint* framebuffer, GLuint* framebuffer_tex, int w, int h) {

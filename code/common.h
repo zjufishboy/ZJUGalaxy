@@ -4,6 +4,7 @@
 #include <math.h>
 #include <iostream>
 #include <Windows.h>
+#include <vector>
 
 #include "gl/glew.h"
 #include "gl/glut.h"
@@ -28,6 +29,8 @@ float time();
 
 // 加载一个纹理
 void load_texture(GLuint* tex_id, char* filename);
+
+void load_cubemap(GLuint* tex_id, const vector<char*>& files);
 
 // 创建帧缓冲区
 void create_framebuffer(GLuint* framebuffer, GLuint* framebuffer_tex, int w, int h);

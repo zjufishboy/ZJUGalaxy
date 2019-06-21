@@ -61,16 +61,16 @@ namespace impl {
 class BloomEffect : public Effect {
 
     GLuint
-        bloom_mipmap_framebuffer,
-        bloom_gaussian_h_framebuffer,
-        bloom_gaussian_v_framebuffer,
-        bloom_out_framebuffer;
+        bloom_mipmap_framebuffer = 0,
+        bloom_gaussian_h_framebuffer = 0,
+        bloom_gaussian_v_framebuffer = 0,
+        bloom_out_framebuffer = 0;
 
     GLuint
-        bloom_mipmap_framebuffer_tex,
-        bloom_gaussian_h_framebuffer_tex,
-        bloom_gaussian_v_framebuffer_tex,
-        bloom_out_framebuffer_tex;
+        bloom_mipmap_framebuffer_tex = 0,
+        bloom_gaussian_h_framebuffer_tex = 0,
+        bloom_gaussian_v_framebuffer_tex = 0,
+        bloom_out_framebuffer_tex = 0;
 
     impl::GenMipmapShader* bloom_gen_mipmap_shader;
     impl::GaussianPassShader* bloom_gaussian_h_shader, * bloom_gaussian_v_shader;

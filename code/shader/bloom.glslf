@@ -124,7 +124,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
     
     color = mix(color, color * color * (3.0 - 2.0 * color), vec3(1.0));
-    color = pow(color, vec3(1.3, 1.20, 1.0));    
+    //color = pow(color, vec3(1.3, 1.20, 1.0));    
 
 	color = saturate(color * 1.01);
     
