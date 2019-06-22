@@ -5,7 +5,7 @@
 // hide the shader names
 namespace impl {
     class BlackholeShader : public CGLShader {
-        GLint _resolution, _time, _tex_disc, _tex_previous, _tex_sun, _tex_bg, _cam_mat;
+        GLint _resolution, _time, _tex_disc, _tex_previous, _tex_sun, _tex_bg, _cam_mat, _samples;
     public:
         BlackholeShader(const char* frag_shader) : CGLShader(nullptr, frag_shader) {
             _resolution = glGetUniformLocation(programObject, "resolution");
@@ -15,8 +15,9 @@ namespace impl {
             _tex_sun = glGetUniformLocation(programObject, "tex_sun");
             _tex_bg = glGetUniformLocation(programObject, "tex_bg");
             _cam_mat = glGetUniformLocation(programObject, "cam_mat");
+            _samples = glGetUniformLocation(programObject, "samples");
         };
-        void update(vec3 resolution, float time, GLuint tex_disc, GLuint tex_previous, GLuint tex_sun, GLuint tex_bg, const mat4& cam_mat) {
+        void update(vec3 resolution, float time, GLuint tex_disc, GLuint tex_previous, GLuint tex_sun, GLuint tex_bg, const mat4& cam_mat, int samples) {
             glUniform3f(_resolution, resolution.x, resolution.y, resolution.z);
             glUniform1f(_time, time);
 
@@ -37,6 +38,8 @@ namespace impl {
             glUniform1i(_tex_bg, 4);
 
             glUniformMatrix4fv(_cam_mat, 1, GL_FALSE, glm::value_ptr(cam_mat));
+
+            glUniform1i(_samples, samples);
         }
     };
 }
@@ -67,10 +70,10 @@ public:
 
     // 将黑洞绘制到纹理上
     // 返回纹理id
-    GLuint render_texture(const mat4& cam_mat) {
+    GLuint render_texture(const mat4& cam_mat, int samples) {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         auto shader = use_shader(blackhole_shader);
-        shader->update(resolution_3f(), time(), tex_disc, framebuffer_tex, tex_sun, tex_bg, cam_mat);
+        shader->update(resolution_3f(), time(), tex_disc, framebuffer_tex, tex_sun, tex_bg, cam_mat, samples);
         glRectf(-1.0, -1.0, 1.0, 1.0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         return framebuffer_tex;

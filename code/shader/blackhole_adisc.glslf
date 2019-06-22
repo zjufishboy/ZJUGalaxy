@@ -20,7 +20,8 @@ const float step_time_total = 0.01;
 const int steps = 200;
 const float disc_rot_inner = 0.15;
 const float disc_rot_outer = 0.02;
-const float r_cutoff = 36.5;
+const float r_cutoff = 3600.5;
+uniform int samples;
 
 const float star_orbit_r = 12.;
 const float star_orbit_rot = 0.8;
@@ -60,15 +61,32 @@ vec2 radial_to_uv(vec3 rad) {
     return vec2(u, v);
 }
 
-float ray_sphere_intersect(vec3 r0, vec3 rd, vec3 s0, float sr) {
+float ray_sphere_intersect1(vec3 r0, vec3 rd, vec3 s0, float sr) {
     float a = dot(rd, rd);
     vec3 s0_r0 = r0 - s0;
     float b = 2.0 * dot(rd, s0_r0);
     float c = dot(s0_r0, s0_r0) - (sr * sr);
-    if (b*b - 4.0*a*c < 0.0) {
-        return -1.0;
-    }
-    return (-b - sqrt((b*b) - 4.0*a*c))/(2.0*a);
+    float delta = b*b - 4.0*a*c;
+    return delta >= 0. ? (-b - sqrt((b*b) - 4.0*a*c))/(2.0*a) : -1.;
+}
+
+float ray_sphere_intersect(vec3 ro, vec3 rd, vec3 sph, float sr )
+{
+  vec3 oc = ro - sph;
+  float b = dot( oc, rd );
+  float c = dot( oc, oc ) - sr * sr;
+  float h = b*b - c;
+  if( h<0.0 ) return -1.0;
+  return -b - sqrt( h );
+}
+
+void get_event_horizon(inout vec3 color, inout float alpha_remain, vec3 pos, vec3 old_pos, vec3 cam_pos) {
+    vec3 dir = pos - old_pos;
+    vec3 norm_dir = normalize(dir);
+    float cutoff = min(length(cam_pos), 1.5);
+    float trav = ray_sphere_intersect(pos, norm_dir, vec3(0), cutoff);
+    bool in_eh = (trav >= 0. && trav < length(dir)) || (length(pos) <= cutoff);
+	alpha_remain = in_eh ? 0. : alpha_remain;
 }
 
 void get_disc(inout vec3 color, inout float alpha_remain, vec3 pos, vec3 old_pos) {
@@ -105,9 +123,6 @@ void get_disc(inout vec3 color, inout float alpha_remain, vec3 pos, vec3 old_pos
         color += alpha * alpha_remain * cc;
         alpha_remain *= (1. - alpha);
      }
-
-	bool in_photon_sphere = dot(pos, pos) <= 1.;
-	alpha_remain = in_photon_sphere ? 0. : alpha_remain;
      
 }
 
@@ -161,7 +176,9 @@ void get_star(inout vec3 color, inout float alpha_remain, vec3 pos, vec3 old_pos
 
 vec3 get_accel(float h2, vec3 pos) {
     float r2 = dot(pos, pos);
-	vec3 acc = -1.5 * h2 * pos / pow(r2, 2.5) * 1. ;
+     float r5 = pow(r2, 2.5);
+    //float r5 = r2 * r2 * sqrt(r2);
+	vec3 acc = -1.5 * h2 * pos / r5 * 1. ;
     return acc;
 }
 
@@ -172,14 +189,9 @@ void RK4f(float h2, out vec3 fp, out vec3 fv, vec3 p, vec3 v) {
 
 void light_step(vec3 cam_pos, float h2, inout vec3 pos, inout vec3 v) {
 	float r2 = dot(pos, pos);
-	vec3 acc = get_accel(h2, pos);
-    
+
     float dt = step_time_total;
     dt *= max(10., length(cam_pos));
-	    
-    float dd = dot(normalize(pos), normalize(v));
-    float step_add = 0.;
-    step_add += r2 >= 8. ? pow(r2, .35) : 0.;
     
     vec3 d_p, d_v;
     
@@ -202,49 +214,48 @@ void mainImage(out vec4 fragColor)
 	vec2 uv = gl_FragCoord.xy / resolution.xy;
     vec2 uv_origin = uv;
 
+    vec3 color_sum;
+    float alpha_sum;
 
-    uv.x += (rand(uv + sin(time_total * 1.0)) / resolution.x);
-    uv.y += (rand(uv + 1.0 + sin(time_total * 1.0)) / resolution.y);
-    float rand = (rand(uv + 1.0 + sin(time_total * 1.0)) / 50.);
+    for (int i = 0; i < samples; i++) {
+        vec2 uv_rand;
+        uv_rand.x = (rand(uv + float(i) + sin(time_total * 1.0)) / resolution.x);
+        uv_rand.y = (rand(uv + float(i) + 1.0 + sin(time_total * 1.0)) / resolution.y);
 
-	float aspect = resolution.x / resolution.y;
-	vec3 dir = vec3((uv * 2. - 1.) * vec2(aspect, 1.) * cam_tan_half_v_angle, 1.);
-    dir = (cam_mat * vec4(dir, 0)).xyz;
-    
-    vec3 cam_pos = (cam_mat * vec4(vec3(0), 1)).xyz;
+        uv = uv_origin + uv_rand;
 
-	vec3 pos = cam_pos;
-	vec3 h = cross(pos, dir);
-	float h2 = dot(h, h);
-	vec3 color = vec3(0, 0, 0);
-	float alpha = 1.;
-    
-    
-    // 1. (faster, 120fps)
-    /*do {
-        if (length(cross(normalize(dir), pos)) > r_cutoff) break;
+        float aspect = resolution.x / resolution.y;
+        vec3 dir = vec3((uv * 2. - 1.) * vec2(aspect, 1.) * cam_tan_half_v_angle, 1.);
+        dir = normalize(dir);
+        dir = (cam_mat * vec4(dir, 0)).xyz;
+        
+        vec3 cam_pos = (cam_mat * vec4(vec3(0), 1)).xyz;
+
+        vec3 pos = cam_pos;
+        vec3 h = cross(pos, dir);
+        float h2 = dot(h, h);
+        vec3 color = vec3(0, 0, 0);
+	    float alpha = 1.;
+
         for (int i = 0; i < steps; i++) {
             vec3 old = pos;
-            light_step(h2, pos, dir);
-            get_disc(color, alpha, pos, old);
+            light_step(cam_pos, h2, pos, dir); // 184 fps
+            get_event_horizon(color, alpha, pos, old, cam_pos); // 500fps
+            get_disc(color, alpha, pos, old); // 600fps
+            get_star(color, alpha, pos, old); // 600fps
         }
-    
-    } while (false);*/
-    
-    // 2. (slower, 30fps)
-	if (length(cross(normalize(dir), pos)) <= r_cutoff)
-        for (int i = 0; i < steps; i++) {
-            vec3 old = pos;
-            light_step(cam_pos, h2, pos, dir);
-            get_disc(color, alpha, pos, old);
-            get_star(color, alpha, pos, old);
-        }
-    
-    color *= 3.03;
+        
+        color *= 3.03;
 
-    vec3 c_bg = texture(tex_bg, radial_to_uv(cartesian_to_radial(dir))).rgb;
-    color += alpha * c_bg * c_bg * 0.5;
+        vec3 c_bg = texture(tex_bg, radial_to_uv(cartesian_to_radial(dir))).rgb;
+        color += alpha * c_bg * c_bg * 0.5;
 
+        color_sum += color;
+        alpha_sum += alpha;
+    }
+
+    vec3 color = color_sum / float(samples);
+    float alpha = alpha_sum / float(samples);
 
     //color += texture(tex_previous, uv_origin).rgb;
     const float p = 1.0;
@@ -253,9 +264,6 @@ void mainImage(out vec4 fragColor)
     float blendWeight = 0.5;
     color = mix(color, previous, blendWeight);
     color = pow(color, vec3(p));
-    //color *= 2.;
-    //color = texture(tex_previous, uv_origin).rgb;
-    //return;
 
     fragColor = vec4(saturate(color), 1.);
 }
