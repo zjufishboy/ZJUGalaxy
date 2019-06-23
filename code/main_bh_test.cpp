@@ -21,10 +21,10 @@ DrawTextureEffect* ef_draw_tex;
 Input input;
 
 mat4 cam_mat;
-vec3 cam_pos = vec3(0, 4.5, -28);
-vec2 cam_rot; // yaw and pitch
+vec3 cam_pos = vec3(6.5, 1.4, -14);
+vec3 cam_rot = vec3(-.45, 0.078, 0.31); // yaw, pitch, roll
 vec3 cam_pos_v;
-vec2 cam_rot_v;
+vec3 cam_rot_v;
 float cam_pos_v_init = 2.f;
 float cam_rot_v_init = 0.25f;
 float cam_v_decay = 0.1;
@@ -33,7 +33,7 @@ void set_cam_pos_velocity(vec3 dir) {
     cam_pos_v += vec3(cam_mat * vec4(dir, 0) * cam_pos_v_init);
 }
 
-void set_cam_rot_velocity(vec2 rot) {
+void set_cam_rot_velocity(vec3 rot) {
     cam_rot_v += rot * cam_rot_v_init;
 }
 
@@ -93,8 +93,8 @@ static void key_up(unsigned char k, int x, int y)
 static void key_down(unsigned char k, int x, int y)
 {
     input.on_key_down(k);
-    if (k == 'o') blackhole_samples_index--;
-    if (k == 'p') blackhole_samples_index++;
+    if (k == 'n') blackhole_samples_index--;
+    if (k == 'm') blackhole_samples_index++;
     blackhole_samples_index = clamp<int>(blackhole_samples_index, 0, blackhole_samples.size() - 1);
 }
 
@@ -105,7 +105,7 @@ void update() {
     cam_pos_v *= 1 - cam_v_decay * max(1.f, time_elapsed);
     cam_rot_v *= 1 - cam_v_decay * max(1.f, time_elapsed);
 
-    float factor = input.get_key(' ') ? .2 : 1;
+    float factor = input.get_key(' ') ? .05 : 1;
 
     if (input.get_key('a')) {											//视角变化
         set_cam_pos_velocity(vec3(-1, 0, 0) * factor);
@@ -126,22 +126,29 @@ void update() {
         set_cam_pos_velocity(vec3(0, 0, 1) * factor);
     }
     if (input.get_key('j')) {								//视角变化
-        set_cam_rot_velocity(vec2(-1, 0) * factor);
+        set_cam_rot_velocity(vec3(-1, 0, 0) * factor);
     }
     if (input.get_key('l')) {
-        set_cam_rot_velocity(vec2(1, 0) * factor);
+        set_cam_rot_velocity(vec3(1, 0, 0) * factor);
     }
     if (input.get_key('i')) {
-        set_cam_rot_velocity(vec2(0, -1) * factor);
+        set_cam_rot_velocity(vec3(0, -1, 0) * factor);
     }
     if (input.get_key('k')) {
-        set_cam_rot_velocity(vec2(0, 1) * factor);
+        set_cam_rot_velocity(vec3(0, 1, 0) * factor);
+    }
+    if (input.get_key('u')) {
+        set_cam_rot_velocity(vec3(0, 0, -1) * factor);
+    }    
+    if (input.get_key('o')) {
+        set_cam_rot_velocity(vec3(0, 0, 1) * factor);
     }
 
     cam_mat = glm::identity<mat4>();
     cam_mat = glm::translate(cam_mat, cam_pos);
     cam_mat = glm::rotate(cam_mat, cam_rot[0], vec3(0, 1, 0));
     cam_mat = glm::rotate(cam_mat, cam_rot[1], vec3(1, 0, 0));
+    cam_mat = glm::rotate(cam_mat, cam_rot[2], vec3(0, 0, 1));
 }
 
 void render() {
@@ -163,7 +170,7 @@ int main(int argc, char* argv[])
     glutInit(&argc, argv);
 
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_SINGLE);
-    glutInitWindowSize(400, 300);
+    glutInitWindowSize(700, 500);
 
     int windowHandle = glutCreateWindow("Blackhole Simulation - ZJUGalaxy");
     _set_time_start();
@@ -193,9 +200,9 @@ int main(int argc, char* argv[])
     printf("\n");
     printf("2. 如何操作？\n");
     printf("    WASDZX - 移动镜头\n");
-    printf("    IJKL - 旋转镜头\n");
+    printf("    IJKLUO - 旋转镜头\n");
     printf("    空格 - 减缓镜头速度\n");
-    printf("    OP - 减/增抗锯齿倍数\n");
+    printf("    NM - 减/增抗锯齿倍数\n");
 
     printf("\n");
     printf("3. 注\n");
