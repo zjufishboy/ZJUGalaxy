@@ -4,6 +4,7 @@
 #include <math.h>
 #include <iostream>
 #include <Windows.h>
+#define GLUT_DISABLE_ATEXIT_HACK 
 
 #include "gl/glew.h"
 #include "gl/glut.h"

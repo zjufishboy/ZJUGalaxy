@@ -4,7 +4,9 @@
 #include<Windows.h>
 #include<string>
 #include <math.h>
+#include "gl/glew.h"
 #include "gl/glut.h"
+#include "sunShader.h"
 
 //定义
 #define BITMAP_ID 0x4D42
@@ -44,6 +46,8 @@ char *BACKGROUND = TEXTURE_PATH("milky_way");
 //背景纹理编号
 GLuint *background = &texture[9];
 
+SunShader *theSunShader;
+
 //整体相对偏移数据
 float fTranslate;								//移动初始值
 float fRotate;									//旋转初始值
@@ -57,6 +61,7 @@ GLfloat body_rotation = 0;						//公转转衡量度
 
 //二次曲面声明类型
 GLUquadricObj* qobj;
+
 
 //其他开关参数（有几个没用上）
 bool bPersp = false;	 //透视
@@ -194,6 +199,7 @@ void init()
 		texload(i, (solarSystem[i].texture_path));//加载对应的星球贴图
 	}
 	texload(9,BACKGROUND);//背景图纹理
+	texload(10, "texture/sunshader.bmp");
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //多边形的显示方式,模式将适用于物体的所有面采用填充形式
 }
 //公转半径计算：因为无法完全按照比例来，所以参考了国际画图标准，将地内行星的比例相对改变了
@@ -251,15 +257,23 @@ void Draw_Galaxy() // This function draws a triangle with RGB colors
 	//开启光照混合
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glColor3f(1.0f, 1.0f, 1.0f);
+	
+
+	load_texture()
+	theSunShader->enable();
+	theSunShader->update(resolution_3f(), time());
 
 	
 	double_t axis[3] = { 0, 0, 1 };//初始坐标轴
 	for (int i = 0; i < 9; i++) {
+		if (i > 1) {
+			theSunShader->disable();
+		}
 		glPushMatrix();
 		axis[0] = 0;axis[1] = 1;axis[2] = 0;//自转轴初始化
 		if(i>0)glRotatef(get_rotation_2(solarSystem[i].orbit.period), 0, 0, 1);
 		glTranslatef(RadiusTransform(solarSystem[i].orbit.radius), 0, 0);							//移动到行星对应的公转轴位置
-		//multiply_vector_by_matrix(axis, solarSystem[i].z_rotation_inverse);						//相乘得到太阳系轴
+		multiply_vector_by_matrix(axis, solarSystem[i].z_rotation_inverse);						//相乘得到太阳系轴
 		glRotatef(get_rotation(solarSystem[i].period), 0, 0, 1);
 		glBindTexture(GL_TEXTURE_2D, *solarSystem[i].texture_name);									//选择纹理texture[0]
 		glEnable(GL_TEXTURE_2D);																	//启用二维纹理
@@ -271,6 +285,8 @@ void Draw_Galaxy() // This function draws a triangle with RGB colors
 		glDisable(GL_TEXTURE_2D);																	//关闭二维纹理
 		glPopMatrix();
 	}
+
+
 }
 
 
@@ -390,12 +406,12 @@ void Display()
 				center[0], center[1], center[2],
 				0, 1, 0);				
 
-	//if (bWire) {
-	//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//}
-	//else {
+	if (bWire) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//}
+	}
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);							//灯光
@@ -423,10 +439,12 @@ void Display()
 	glutSwapBuffers();							
 }
 
+
 int main(int argc,  char *argv[])
 {
 	
 	glutInit(&argc, argv);
+
 
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowSize(1024,512);
@@ -440,6 +458,8 @@ int main(int argc,  char *argv[])
 	glutKeyboardFunc(key);
 	glutIdleFunc(idle);
 
+	glewInit();
+	theSunShader = new SunShader;
 	glutMainLoop();
 	
 	return 0;

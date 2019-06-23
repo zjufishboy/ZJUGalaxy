@@ -1,4 +1,5 @@
 #pragma once
+#define GLUT_DISABLE_ATEXIT_HACK 
 #include <GL/glew.h>
 #include <iostream>
 
@@ -14,7 +15,7 @@ public:
 
 	virtual void enable();
 	virtual void disable();
-	// virtual void update();
+	virtual void update() = 0;
 
 private:
 	void cleanExit(int exitval);
