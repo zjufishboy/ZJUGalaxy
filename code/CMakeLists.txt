@@ -11,9 +11,12 @@ set(src
 	"common.h"
 	"draw_texture.cpp"
 	"draw_texture.h"
+	"input.cpp"
+	"input.h"
 	"sphere_tree.cpp"
 	"sphere_tree.h"
 )
+
 
 # 添加源文件
 add_executable (ZJUGalaxy "main.cpp" ${src})
