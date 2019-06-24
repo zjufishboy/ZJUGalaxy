@@ -4,14 +4,12 @@
 #include <math.h>
 #include <iostream>
 #include <Windows.h>
-<<<<<<< HEAD
 #define GLUT_DISABLE_ATEXIT_HACK 
-=======
+
 #include <vector>
 #include <string>
 #include <stdarg.h>
 #include <memory>
->>>>>>> 466e02f1030c47c21156bb71fb7a42c8135863d8
 
 #include "gl/glew.h"
 #include "gl/glut.h"

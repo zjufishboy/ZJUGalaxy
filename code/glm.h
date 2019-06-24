@@ -8,7 +8,7 @@
 
 
 /* includes */
-#include <GL/glut.h>
+#include "gl/glut.h"
 
 
 #ifndef M_PI

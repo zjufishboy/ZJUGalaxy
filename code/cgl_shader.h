@@ -15,7 +15,7 @@ public:
 
 	virtual void enable();
 	virtual void disable();
-	virtual void update() = 0;
+	// virtual void update();
 
 private:
 	void cleanExit(int exitval);
