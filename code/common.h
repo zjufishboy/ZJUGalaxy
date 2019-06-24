@@ -4,7 +4,7 @@
 #include <math.h>
 #include <iostream>
 #include <Windows.h>
-#define GLUT_DISABLE_ATEXIT_HACK 
+// #define GLUT_DISABLE_ATEXIT_HACK 
 
 #include <vector>
 #include <string>

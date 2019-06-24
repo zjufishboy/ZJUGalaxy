@@ -30,14 +30,15 @@ set(src2
 	"sphere_tree.h"
 )
 
+aux_source_directory(. src_all)
 
 # 添加源文件
-add_executable (ZJUGalaxy "main.cpp" ${src1})
-add_executable (BlackholeTest "main_bh_test.cpp" ${src2})
+add_executable (ZJUGalaxy ${src_all})
+# add_executable (BlackholeTest "main_bh_test.cpp" ${src2})
 
 set(targets
 	ZJUGalaxy
-	BlackholeTest
+	# BlackholeTest
 )
 
 # 要复制到执行目录的文件

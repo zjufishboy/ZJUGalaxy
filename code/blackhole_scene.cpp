@@ -3,6 +3,7 @@
 #include "draw_texture.h"
 #include "blackhole.h"
 #include "input.h"
+#include "blackhole_scene.h"
 #include <Windows.h>
 #include <vector>
 #include <unordered_map>
@@ -139,7 +140,7 @@ void update() {
     }
     if (input.get_key('u')) {
         set_cam_rot_velocity(vec3(0, 0, -1) * factor);
-    }    
+    }
     if (input.get_key('o')) {
         set_cam_rot_velocity(vec3(0, 0, 1) * factor);
     }
@@ -164,10 +165,11 @@ void render() {
     print_string(15, pos_y += 15, string_format("FPS=%.2f", fps));
 }
 
-int main(int argc, char* argv[])
+void run_blackhole_scene()
 {
-
-    glutInit(&argc, argv);
+    char* ag = "";
+    int ac = 0;
+    glutInit(&ac, &ag);
 
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_SINGLE);
     glutInitWindowSize(700, 500);
@@ -212,6 +214,4 @@ int main(int argc, char* argv[])
     printf("    R=1.00Rs时，你处于事件视界上。因为这是一个近似的模拟，所以画面在此时已经失真。实际情况是——如果你在自由落体，那么画面一切正常，你不会发现自己穿过了事件视界；而如果你试图保持相对黑洞静止，那么你只能在远离黑洞的方向看到一束光。\n");
 
     glutMainLoop();
-
-    return 0;
 }

@@ -1,5 +1,5 @@
 #pragma once
-#define GLUT_DISABLE_ATEXIT_HACK 
+// #define GLUT_DISABLE_ATEXIT_HACK 
 #include <GL/glew.h>
 #include <iostream>
 
