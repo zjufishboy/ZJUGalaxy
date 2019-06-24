@@ -1,6 +1,19 @@
 cmake_minimum_required (VERSION 3.8)
 
-set(src
+set(src1
+	"snap.h"
+	"snap.cpp"
+	"obj.h"
+	"obj.cpp"
+	"glm.cpp"
+	"glm.h"
+	"main.cpp"
+	"cgl_shader.cpp"
+	"cgl_shader.h"
+	"common.cpp"
+	"common.h"
+)
+set(src2
 	"blackhole.cpp"
 	"blackhole.h"
 	"bloom.cpp"
@@ -19,8 +32,8 @@ set(src
 
 
 # 添加源文件
-add_executable (ZJUGalaxy "main.cpp" ${src})
-add_executable (BlackholeTest "main_bh_test.cpp" ${src})
+add_executable (ZJUGalaxy "main.cpp" ${src1})
+add_executable (BlackholeTest "main_bh_test.cpp" ${src2})
 
 set(targets
 	ZJUGalaxy
