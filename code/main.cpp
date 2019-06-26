@@ -7,6 +7,7 @@
 #include "glut.h"
 #include "snap.h"
 #include "blackhole_scene.h"
+#include "main_earth.h"
 
 //定义
 #define BITMAP_ID 0x4D42
@@ -88,7 +89,7 @@ int speed_self = 0;		//自转速度挡位
 int choices = 1;
 
 //预设颜色
-float white[] = { 1.0f, 1.0f,1.0f, 1.0f };
+static float white[] = { 1.0f, 1.0f,1.0f, 1.0f };
 float grey[] = { 0.5f,0.5f,0.5f,1.0f };
 float green[] = { 0.0f,1.0f,0.0f,1.0f };
 
@@ -603,8 +604,9 @@ int main(int argc, char* argv[])
 {
 select:
     printf("请选择场景：\n");
-    printf("1. 太阳系：\n");
-    printf("2. 黑洞：\n");
+    printf("1. 太阳系\n");
+    printf("2. 黑洞\n");
+	printf("3. 地球\n");
     int scene;
     scanf("%d", &scene);
     if (scene == 1) {
@@ -657,6 +659,9 @@ select:
     else if (scene == 2) {
         run_blackhole_scene();
     }
+	else if (scene == 3) {
+		main_earth();
+	}
     else {
         goto select;
     }

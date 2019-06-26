@@ -61,15 +61,6 @@ vec2 radial_to_uv(vec3 rad) {
     return vec2(u, v);
 }
 
-float ray_sphere_intersect1(vec3 r0, vec3 rd, vec3 s0, float sr) {
-    float a = dot(rd, rd);
-    vec3 s0_r0 = r0 - s0;
-    float b = 2.0 * dot(rd, s0_r0);
-    float c = dot(s0_r0, s0_r0) - (sr * sr);
-    float delta = b*b - 4.0*a*c;
-    return delta >= 0. ? (-b - sqrt((b*b) - 4.0*a*c))/(2.0*a) : -1.;
-}
-
 float ray_sphere_intersect(vec3 ro, vec3 rd, vec3 sph, float sr )
 {
   vec3 oc = ro - sph;
@@ -174,10 +165,10 @@ void get_star(inout vec3 color, inout float alpha_remain, vec3 pos, vec3 old_pos
     alpha_remain *= (1. - alpha);
 }
 
+
 vec3 get_accel(float h2, vec3 pos) {
     float r2 = dot(pos, pos);
-     float r5 = pow(r2, 2.5);
-    //float r5 = r2 * r2 * sqrt(r2);
+    float r5 = pow(r2, 2.5);
 	vec3 acc = -1.5 * h2 * pos / r5 * 1. ;
     return acc;
 }
