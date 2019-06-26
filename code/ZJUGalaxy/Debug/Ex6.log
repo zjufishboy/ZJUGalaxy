@@ -1,6 +1,0 @@
-﻿  main.cpp
-c:\users\asus\desktop\实验6\实验六\ex6\ex6\main.cpp(83): warning C4018: “<”: 有符号/无符号不匹配
-c:\users\asus\desktop\实验6\实验六\ex6\ex6\main.cpp(45): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\stdio.h(208): note: 参见“fopen”的声明
-c:\users\asus\desktop\实验6\实验六\ex6\ex6\main.cpp(121): warning C4554: “^”: 检查运算符优先级是否存在的可能的错误；使用括号阐明优先级
-  Ex6.vcxproj -> C:\Users\asus\Desktop\实验6\实验六\Ex6\Debug\Ex6.exe
